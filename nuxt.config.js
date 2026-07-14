@@ -1,5 +1,7 @@
 const head = require('./nuxt-config/head')
 
+const isDev = process.env.NODE_ENV === 'development'
+
 module.exports = {
   watch: ['nuxt-config/**/*'],
   /*
@@ -105,7 +107,6 @@ module.exports = {
     { src: '~/plugins/dynamic-head', ssr: false },
     { src: '~/plugins/iconify', ssr: false }, // https://www.npmjs.com/package/@iconify/vue
     { src: '~/plugins/vue-timeago', ssr: false }, // https://vue-timeago.egoist.sh
-    { src: '~/plugins/portal-vue', ssr: false }, // https://v2.portal-vue.linusb.org/
     { src: '~/plugins/vue-croppa', ssr: false }, // https://www.npmjs.com/package/vue-croppa
     { src: '~/plugins/acs', ssr: false }, // https://audiocss.dev — UI sound effects
     { src: '~/plugins/vue-infinite-loading', ssr: false } // https://www.npmjs.com/package/vue-infinite-loading
@@ -120,6 +121,7 @@ module.exports = {
       path: '@/components',
       pathPrefix: false,
       extensions: ['vue'],
+      lazy: true,
       extendComponent(component) {
         /**
          * Remove 'Component' suffix for generated component names
@@ -141,21 +143,25 @@ module.exports = {
     '@nuxtjs/composition-api/module',
     // https://github.com/nuxt-community/style-resources-module
     '@nuxtjs/style-resources',
-    // https://github.com/nuxt-community/eslint-module
-    [
-      '@nuxtjs/eslint-module',
-      {
-        // eslint module options
-      }
-    ],
-    // https://github.com/nuxt-community/stylelint-module
-    [
-      '@nuxtjs/stylelint-module',
-      {
-        // stylelint module options
-        files: ['{assets/style,components,layouts,pages}/**/*.{css,sass,scss,less,stylus,vue}']
-      }
-    ],
+    ...(isDev
+      ? [
+          // https://github.com/nuxt-community/eslint-module
+          [
+            '@nuxtjs/eslint-module',
+            {
+              // eslint module options
+            }
+          ],
+          // https://github.com/nuxt-community/stylelint-module
+          [
+            '@nuxtjs/stylelint-module',
+            {
+              // stylelint module options
+              files: ['{assets/style,components,layouts,pages}/**/*.{css,sass,scss,less,stylus,vue}']
+            }
+          ]
+        ]
+      : []),
     // https://www.npmjs.com/package/nuxt-font-loader
     [
       'nuxt-font-loader',
@@ -254,7 +260,6 @@ module.exports = {
         defaultLocale: 'tr',
         strategy: 'prefix_except_default',
         detectBrowserLanguage: false,
-        detectBrowserLanguage: false,
         parsePages: false,
         pages: {
           'Main/index': {
@@ -349,10 +354,6 @@ module.exports = {
             tr: '/kelimeblok',
             en: '/wordblock'
           },
-          'WordblockMode/index': {
-            tr: '/kelimeblok',
-            en: '/wordblock'
-          },
           'WordblockMode/_charLength': {
             tr: '/kelimeblok/:charLength-harf',
             en: '/wordblock/:charLength-letters'
@@ -400,7 +401,7 @@ module.exports = {
       analyzerMode: 'static'
     }, */
     standalone: true, // for ESM import
-    extractCSS: false,
+    extractCSS: !isDev,
     babel: {
       plugins: [
         [

@@ -1,10 +1,7 @@
-import { useContext, useStore, ref, reactive, computed, watch, nextTick } from '@nuxtjs/composition-api'
+import { useContext, useStore, ref, reactive, computed, watch, nextTick, onBeforeUnmount } from '@nuxtjs/composition-api'
 import { UNSUPPORTED_HEIGHT } from '@/system/constant'
 import { gameModeKeyEnum } from '@/enums/gameModeKey.enum'
 import { answerTypeEnum } from '@/enums/quiz.enum'
-// Swiper
-import Swiper from 'swiper'
-import 'swiper/swiper-bundle.min.css'
 // Howler
 import { Howl } from 'howler'
 // Textfit
@@ -29,7 +26,7 @@ export default () => {
 
   const isGameOver = computed(() => store.getters[`${activeGameMode.value}/isGameOver`])
 
-  watch(isGameOver, async value => {
+  const stopIsGameOverWatch = watch(isGameOver, async value => {
     if (value) {
       await nextTick()
       await endGame()
@@ -62,25 +59,26 @@ export default () => {
 
   const alphabet = computed(() => store.getters[`${activeGameMode.value}/alphabet`])
 
-  if (activeGameMode.value !== gameModeKeyEnum.TOUR) {
-    watch(
-      () => alphabet.value.activeIndex,
-      async value => {
-        await store.commit(`${activeGameMode.value}/SET_ALPHABET_ACTIVE_INDEX`, value)
-        await statsWriteToLocalStorage()
+  const stopAlphabetWatch =
+    activeGameMode.value !== gameModeKeyEnum.TOUR
+      ? watch(
+          () => alphabet.value.activeIndex,
+          async value => {
+            await store.commit(`${activeGameMode.value}/SET_ALPHABET_ACTIVE_INDEX`, value)
+            await statsWriteToLocalStorage()
 
-        if (value === -1) {
-          endGame()
+            if (value === -1) {
+              endGame()
 
-          return false
-        }
+              return false
+            }
 
-        carousels.alphabet.slideTo(value)
-        resetAnswerField()
-        questionFitText()
-      }
-    )
-  }
+            carousels.alphabet.slideTo(value)
+            resetAnswerField()
+            questionFitText()
+          }
+        )
+      : null
 
   const alphabetItemClasses = (item, index) => {
     if (index === alphabet.value.activeIndex) {
@@ -112,7 +110,7 @@ export default () => {
   })
 
   const myAnswers = ref([])
-  watch(
+  const stopMyAnswersWatch = watch(
     () => myAnswers.value,
     currentValue => {
       const passedAnswers = store.getters[`${activeGameMode.value}/passedAnswers`]
@@ -253,7 +251,7 @@ export default () => {
     answer.field = $event.target.value
   }
 
-  watch(
+  const stopAnswerFocusWatch = watch(
     () => answer.isFocused,
     value => {
       if (value) {
@@ -341,6 +339,8 @@ export default () => {
   const initCarousels = async () => {
     await nextTick()
 
+    const [{ default: Swiper }] = await Promise.all([import('swiper'), import('swiper/swiper-bundle.min.css')])
+
     const alphabetCarousel = new Swiper('.alphabet-carousel', {
       direction: 'horizontal',
       speed: 800,
@@ -373,7 +373,7 @@ export default () => {
 
   const isActiveGameSceneSoundFx = computed(() => store.getters['app/isActiveGameSceneSoundFx'])
 
-  watch(
+  const stopSoundFxWatch = watch(
     () => isActiveGameSceneSoundFx.value,
     value => {
       if (value) {
@@ -449,6 +449,22 @@ export default () => {
   soundFx.halfTime = halfTimeSoundFx
   soundFx.hurryUp = hurryUpSoundFx
   soundFx.countdownFinish = countdownFinishSoundFx
+
+  onBeforeUnmount(() => {
+    stopIsGameOverWatch()
+    stopAlphabetWatch?.()
+    stopMyAnswersWatch()
+    stopAnswerFocusWatch()
+    stopSoundFxWatch()
+
+    startSoundFx.unload()
+    correctSoundFx.unload()
+    wrongSoundFx.unload()
+    passSoundFx.unload()
+    halfTimeSoundFx.unload()
+    hurryUpSoundFx.unload()
+    countdownFinishSoundFx.unload()
+  })
 
   const startGame = async () => {
     await nextTick()

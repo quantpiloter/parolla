@@ -427,6 +427,12 @@ export default defineComponent({
       store.commit('tour/SET_IS_CHAT_FOCUSED', false)
     }
 
+    const tourModeHandlers = {
+      handleSend: handleAnswer
+    }
+    const onTouchEnd = event => handleDontHideKeyboard(event, tourModeHandlers)
+    const onWindowBeforeUnload = event => handleBeforeUnload(event)
+
     onMounted(() => {
       window.addEventListener('ws-event', handleWsEvent)
 
@@ -434,14 +440,11 @@ export default defineComponent({
 
       window.addEventListener('keyup', handleKeyUp)
       window.addEventListener('resize', questionFitText)
-      window.addEventListener('beforeunload', event => handleBeforeUnload(event))
+      window.addEventListener('beforeunload', onWindowBeforeUnload)
       window.addEventListener('scroll', scrollTop)
 
       if (isTouchEnabled) {
-        const tourModeHandlers = {
-          handleSend: handleAnswer
-        }
-        rootRef.value?.addEventListener('touchend', event => handleDontHideKeyboard(event, tourModeHandlers))
+        rootRef.value?.addEventListener('touchend', onTouchEnd)
       }
 
       // Unsupported screen height
@@ -455,14 +458,11 @@ export default defineComponent({
 
       window.removeEventListener('keyup', handleKeyUp)
       window.removeEventListener('resize', questionFitText)
-      window.removeEventListener('beforeunload', handleBeforeUnload)
+      window.removeEventListener('beforeunload', onWindowBeforeUnload)
       window.removeEventListener('scroll', scrollTop)
 
       if (isTouchEnabled) {
-        const tourModeHandlers = {
-          handleSend: handleAnswer
-        }
-        rootRef.value?.removeEventListener('touchend', event => handleDontHideKeyboard(event, tourModeHandlers))
+        rootRef.value?.removeEventListener('touchend', onTouchEnd)
       }
 
       Toast.clear()

@@ -189,6 +189,11 @@ export default defineComponent({
       }
     }
 
+    const onKeyUpTab = event => handleTabKey(event)
+    const onKeyUpAutoFocus = event => handleAnswerFieldAutoFocus(event)
+    const onWindowBeforeUnload = event => handleBeforeUnload(event)
+    const onTouchEnd = event => handleDontHideKeyboard(event)
+
     onMounted(() => {
       setRootRef(rootRef.value)
 
@@ -200,16 +205,16 @@ export default defineComponent({
         store.commit('daily/SET_IS_OPEN_STATS_DIALOG', true)
       }
 
-      window.addEventListener('keyup', event => handleTabKey(event))
-      window.addEventListener('keyup', event => handleAnswerFieldAutoFocus(event))
+      window.addEventListener('keyup', onKeyUpTab)
+      window.addEventListener('keyup', onKeyUpAutoFocus)
 
       window.addEventListener('resize', questionFitText)
-      window.addEventListener('beforeunload', event => handleBeforeUnload(event))
+      window.addEventListener('beforeunload', onWindowBeforeUnload)
 
       window.addEventListener('scroll', scrollTop)
 
       if (isTouchEnabled) {
-        rootRef.value?.addEventListener('touchend', event => handleDontHideKeyboard(event))
+        rootRef.value?.addEventListener('touchend', onTouchEnd)
       }
 
       // Unsupported screen height
@@ -217,13 +222,15 @@ export default defineComponent({
     })
 
     onUnmounted(() => {
+      window.removeEventListener('keyup', onKeyUpTab)
+      window.removeEventListener('keyup', onKeyUpAutoFocus)
       window.removeEventListener('resize', questionFitText)
-      window.removeEventListener('beforeunload', handleBeforeUnload)
+      window.removeEventListener('beforeunload', onWindowBeforeUnload)
 
       window.removeEventListener('scroll', scrollTop)
 
       if (isTouchEnabled) {
-        rootRef.value?.removeEventListener('touchend', handleDontHideKeyboard)
+        rootRef.value?.removeEventListener('touchend', onTouchEnd)
       }
     })
 

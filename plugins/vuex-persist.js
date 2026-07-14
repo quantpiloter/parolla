@@ -13,7 +13,7 @@ export default ({ store }) => {
       daily: {
         isGameOver: state.daily.isGameOver,
         currentDate: state.daily.currentDate,
-        questions: state.daily.questions
+        ...(state.daily.isGameOver ? {} : { questions: state.daily.questions })
       },
       wordblock:
         state.wordblock && state.wordblock.games
