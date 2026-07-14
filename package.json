@@ -1,16 +1,19 @@
 {
   "name": "parolla",
   "version": "2.52.0",
-  "description": "Kelime oyunu",
+  "description": "Turkish word game platform with daily quizzes, multiplayer modes, and player-created content",
   "private": true,
   "engines": {
     "node": "22.11.0"
   },
   "packageManager": "yarn@4.6.0",
   "keywords": [
-    "kelime oyunu",
-    "bulmaca",
-    "trivia"
+    "word game",
+    "turkish word game",
+    "quiz",
+    "trivia",
+    "nuxt",
+    "vue"
   ],
   "author": "selimdoyranli",
   "contributors": [
@@ -20,7 +23,7 @@
   "homepage": "https://parolla.app",
   "repository": {
     "type": "git",
-    "url": "https://github.com/selimdoyranli/parolla"
+    "url": "https://github.com/quantpiloter/parolla"
   },
   "license": "CC BY‑NC 4.0",
   "scripts": {

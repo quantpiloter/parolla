@@ -1,7 +1,7 @@
 {
   "name": "parolla",
   "short_name": "parolla",
-  "description": "Kelime oyunu",
+  "description": "Turkish word game platform with daily quizzes, multiplayer modes, and player-created content",
   "lang": "tr-TR",
   "start_url": "https://parolla.app",
   "display": "standalone",
